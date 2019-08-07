@@ -10,11 +10,20 @@ npm install node-red-contrib-pi-vcgencmd
 ## Introduction
 The ***vcgencmd*** (linux command line) tool can be used to send a broad range of commands to the VideoCore processor (indeed the 'vc' stands for VideoCore).  VideoCore is a low-power mobile multimedia processor (manufactured by Broadcom), which can decode/encode a series of multimedia codecs:
 
-![image](https://user-images.githubusercontent.com/14224149/62661253-c854ff00-b970-11e9-9baa-deb53ce40dbd.png)
+![PCB raspberry](https://user-images.githubusercontent.com/14224149/62661253-c854ff00-b970-11e9-9baa-deb53ce40dbd.png)
 
 The vcgencmd command is ***only available on Raspberry Pi hardware***, and perhaps on other devices containing a Broadcom VideoCore processor.
 
 Remark: The documentation of the vcgencmd tool is not really sufficient to get started.  I got a lot of useful information from the book [Hacks für Raspberry Pi](https://books.google.be/books?isbn=3955616339).  For those who don't speak German, there is a 'translate' link in that page ...
+
+## Node usage
+By sending a (random) input message to the input, the node will access (via the vcgendcmd) the processor to get the requested information.  As soon as the processor has returned the information, one or more output messages will be send containing that information:
+
+![Example flow](https://user-images.githubusercontent.com/14224149/62661902-b1171100-b972-11e9-93d0-ede5bfef846d.png)
+
+Some remarks:
++ During the processing, the process id (PID) of the child process will be displayed in the node status.
++ When a new input message is send during the processing of the previous message, then the new input message will be ignored.  A warning will be logged to inform about this...
 
 ## Node configuration
 The vcgencmd command offers a large amount of options on a Raspberry Pi, but we agreed on the Node-RED [forum](https://discourse.nodered.org/t/ras-pi-supply-voltage/8791/12) to reduce the number of options in this node:
