@@ -1,0 +1,168 @@
+<!--
+  Copyright 2019, Bart Butenaers
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<script type="text/javascript">
+    // TODO icoontjes van fontawesome ophalen 
+    RED.nodes.registerType('vcgencmd',{
+        category: 'function',
+        color: '#E9967A',
+        defaults: {
+            name: {value:""},
+            command: {value:"version"},
+            codec: {value:"H264"},
+            clock: {value:"core"},
+            voltage: {value:"core"},
+            memory: {value:"arm"},
+            videoOutput: {value:"0"}
+        },        
+        inputs:1,
+        outputs:1,
+        icon: "rpi.png",
+        label: function() {
+            return this.name || "vcgencmd";
+        },
+        paletteLabel: "vcgencmd",
+        oneditprepare: function() {
+            $("#node-input-command").change(function() {
+                var command = $("#node-input-command").val();
+                
+                // Hide all rows concerning the command detailed settings, and show some of these again below
+                $(".command-row").hide();;
+                
+                // Depending on the router type, some specific element(s) should be showed
+                switch (command) {
+                    case "codec_enabled":
+                        $("#codec-div").show();
+                        break;
+                    case "measure_clock":
+                        $("#clock-div").show();
+                        break;
+                    case "measure_volts":
+                        $("#voltage-div").show();
+                        break;     
+                    case "get_mem":
+                        $("#memory-div").show();
+                        break;     
+                    case "display_power":
+                        $("#videoOutput-div").show();
+                        break;     
+                }                        
+            });
+        },
+        oneditsave: function() {
+
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="vcgencmd">
+    <div class="form-row">
+        <label for="node-input-command"><i class="fa fa-arrow-left"></i> Command</label>
+        <select type="text" id="node-input-command" style="width:70%;">
+            <option value="get_throttled">Check throttling</option>
+            <option value="measure_temp">Get temperature</option>  
+            <option value="measure_volts">Get voltage level</option>
+            <option value="measure_clock">Get clock frequency</option>
+            <option value="version">Get firmware version</option>
+            <option value="codec_enabled">Check codec enabled</option>
+            <option value="display_power">Control video output</option>  
+            <option value="mem_oom">Get out-of-memory statistics</option>
+            <option value="get_mem">Get available memory</option>
+        </select>
+    </div>
+    <div class="form-row command-row" id="codec-div">
+        <label for="node-input-codec"><i class="fa fa-arrow-left"></i> Codec</label>
+        <select type="text" id="node-input-codec" style="width:70%;">
+            <option value="H263">H263</option>
+            <option value="H264">H264</option>
+            <option value="MPG2">MPG2</option>
+            <option value="WVC1">WVC1</option>
+            <option value="MPG4">MPG4</option>
+            <option value="AGIF">AGIF</option>
+            <option value="MJPA">MJPA</option>  
+            <option value="MJPB">MJPB</option>   
+            <option value="MJPG">MJPG</option>
+            <option value="WMV9">WMV9</option>
+            <option value="MVC0">MVC0</option>
+        </select>
+    </div>
+    <div class="form-row command-row" id="clock-div">
+        <label for="node-input-clock"><i class="fa fa-arrow-left"></i> Clock</label>
+        <select type="text" id="node-input-clock" style="width:70%;">
+            <option value="core">core</option>
+            <option value="arm">arm</option>
+            <option value="h264">h264</option>
+            <option value="isp">isp</option>
+            <option value="v3d">v3d</option>
+            <option value="uart">uart</option>
+            <option value="pwm">pwm</option>  
+            <option value="emmc">emmc</option>   
+            <option value="pixel">pixel</option>
+            <option value="vec">vec</option>
+            <option value="hdmi">hdmi</option>
+            <option value="dpi">dpi</option>
+        </select>
+    </div>
+    <div class="form-row command-row" id="voltage-div">
+        <label for="node-input-voltage"><i class="fa fa-arrow-left"></i> Voltage</label>
+        <select type="text" id="node-input-voltage" style="width:70%;">
+            <option value="core">core</option>
+            <option value="sdram_c">sdram_c</option>
+            <option value="sdram_i">sdram_i</option>
+            <option value="sdram_p">sdram_p</option>
+        </select>
+    </div>
+    <div class="form-row command-row" id="memory-div">
+        <label for="node-input-memory"><i class="fa fa-arrow-left"></i> Memory</label>
+        <select type="text" id="node-input-memory" style="width:70%;">
+            <option value="arm">arm</option>
+            <option value="gpu">gpu</option>
+        </select>
+    </div>
+    <div class="form-row command-row" id="videoOutput-div">
+        <label for="node-input-videoOutput"><i class="fa fa-power-off"></i> Video output</label>
+        <select type="text" id="node-input-videoOutput" style="width:70%;">
+            <option value="0">On</option>
+            <option value="1">Off</option>
+        </select>
+    </div> 
+    </br>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="vcgencmd">
+    <p>A Node-RED node to support vcgencmd commands on Raspberry Pi.</p>
+    <p>See the <a target="_blank" href="https://github.com/bartbutenaers/node-red-contrib-pi-vcgencmd">readme</a> page on Github for more information.</p>
+    <p>The following reduced subset of the vcgencmd commands is available:
+    <p><strong>Check throttling:</strong><br/>
+    Check whether the hardware has been throttle due to under-voltage levels, which will result in bad performance.</p>    
+    <p><strong>Get temperature:</strong><br/>
+    Get the temperature (Celsius) of the specified hardware part (core, arm, ...).</p> 
+    <p><strong>Get voltage level:</strong><br/>
+    Get the voltage level (V) of the specified hardware part (core, sdram_c, ...).</p>     
+    <p><strong>Get clock frequency:</strong><br/>
+    Get the clock frequency (Hz) of the specified hardware part (core, arm, ...).</p>  
+    <p><strong>Get firmware version:</strong><br/>
+    Shows the VideoCore firmware version.</p>    
+    <p><strong>Check codec enabled:</strong><br/>
+    Check if the specified codec (H264, MPG2, ...) is enabled.</p>    
+    <p><strong>Control video output:</strong><br/>
+    Turn the power of the video output on/off.</p>
+    <p><strong>Get out-of-memory statistics:</strong><br/>
+    Get a report of statistics on Out-of-Memory events.</p>     
+    <p><strong>Get available memory:</strong><br/>
+    Shows how much memory is split between the CPU (arm) and GPU.</p> 
+</script>
+
