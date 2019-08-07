@@ -17,12 +17,13 @@
         color: '#E9967A',
         defaults: {
             name: {value:""},
-            command: {value:"version"},
+            command: {value:"get_throttled"},
             codec: {value:"H264"},
             clock: {value:"core"},
             voltage: {value:"core"},
             memory: {value:"arm"},
-            videoOutput: {value:"0"}
+            videoOutput: {value:"0"},
+            separateMsg: {value: false}
         },        
         inputs:1,
         outputs:1,
@@ -40,6 +41,9 @@
                 
                 // Depending on the router type, some specific element(s) should be showed
                 switch (command) {
+                    case "get_throttled":
+                        $("#separateMsg-div").show();
+                        break;
                     case "codec_enabled":
                         $("#codec-div").show();
                         break;
@@ -66,7 +70,7 @@
 
 <script type="text/x-red" data-template-name="vcgencmd">
     <div class="form-row">
-        <label for="node-input-command"><i class="fa fa-arrow-left"></i> Command</label>
+        <label for="node-input-command"><i class="fa fa-terminal"></i> Command</label>
         <select type="text" id="node-input-command" style="width:70%;">
             <option value="get_throttled">Check throttling</option>
             <option value="measure_temp">Get temperature</option>  
@@ -75,12 +79,16 @@
             <option value="version">Get firmware version</option>
             <option value="codec_enabled">Check codec enabled</option>
             <option value="display_power">Control video output</option>  
-            <option value="mem_oom">Get out-of-memory statistics</option>
             <option value="get_mem">Get available memory</option>
         </select>
     </div>
+    <div class="form-row command-row" id="separateMsg-div">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-separateMsg" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-separateMsg" style="width:50%;"> Separate output messages per topic</label>
+    </div>
     <div class="form-row command-row" id="codec-div">
-        <label for="node-input-codec"><i class="fa fa-arrow-left"></i> Codec</label>
+        <label for="node-input-codec"><i class="fa fa-video-camera"></i> Codec</label>
         <select type="text" id="node-input-codec" style="width:70%;">
             <option value="H263">H263</option>
             <option value="H264">H264</option>
@@ -93,10 +101,16 @@
             <option value="MJPG">MJPG</option>
             <option value="WMV9">WMV9</option>
             <option value="MVC0">MVC0</option>
+            <option value="FLAC">FLAC</option>
+            <option value="PCM">PCM</option>
+            <option value="THRA">THRA</option>
+            <option value="VORB">VORB</option>
+            <option value="VP6">VP6</option>
+            <option value="VP8">VP8</option>
         </select>
     </div>
     <div class="form-row command-row" id="clock-div">
-        <label for="node-input-clock"><i class="fa fa-arrow-left"></i> Clock</label>
+        <label for="node-input-clock"><i class="fa fa-clock-o"></i> Clock</label>
         <select type="text" id="node-input-clock" style="width:70%;">
             <option value="core">core</option>
             <option value="arm">arm</option>
@@ -113,7 +127,7 @@
         </select>
     </div>
     <div class="form-row command-row" id="voltage-div">
-        <label for="node-input-voltage"><i class="fa fa-arrow-left"></i> Voltage</label>
+        <label for="node-input-voltage"><i class="fa fa-bolt"></i> Voltage</label>
         <select type="text" id="node-input-voltage" style="width:70%;">
             <option value="core">core</option>
             <option value="sdram_c">sdram_c</option>
@@ -122,7 +136,7 @@
         </select>
     </div>
     <div class="form-row command-row" id="memory-div">
-        <label for="node-input-memory"><i class="fa fa-arrow-left"></i> Memory</label>
+        <label for="node-input-memory"><i class="fa fa-floppy-o"></i> Memory</label>
         <select type="text" id="node-input-memory" style="width:70%;">
             <option value="arm">arm</option>
             <option value="gpu">gpu</option>
@@ -143,26 +157,23 @@
 </script>
 
 <script type="text/x-red" data-help-name="vcgencmd">
-    <p>A Node-RED node to support vcgencmd commands on Raspberry Pi.</p>
+    <p>A Node-RED node to support <strong>vcgencmd</strong> command on Raspberry Pi.</p>
     <p>See the <a target="_blank" href="https://github.com/bartbutenaers/node-red-contrib-pi-vcgencmd">readme</a> page on Github for more information.</p>
-    <p>The following reduced subset of the vcgencmd commands is available:
+    <p>The following reduced subset of the vcgencmd options is available:
     <p><strong>Check throttling:</strong><br/>
-    Check whether the hardware has been throttle due to under-voltage levels, which will result in bad performance.</p>    
+    Check whether the hardware has been throttled due to under-voltage levels, which will result in bad performance.</p>    
     <p><strong>Get temperature:</strong><br/>
-    Get the temperature (Celsius) of the specified hardware part (core, arm, ...).</p> 
+    Get the temperature (Celsius) of the specified hardware component (core, arm, ...).</p> 
     <p><strong>Get voltage level:</strong><br/>
-    Get the voltage level (V) of the specified hardware part (core, sdram_c, ...).</p>     
+    Get the voltage level (V) of the specified hardware component (core, sdram_c, ...).</p>     
     <p><strong>Get clock frequency:</strong><br/>
-    Get the clock frequency (Hz) of the specified hardware part (core, arm, ...).</p>  
+    Get the clock frequency (Hz) of the specified hardware component (core, arm, ...).</p>  
     <p><strong>Get firmware version:</strong><br/>
     Shows the VideoCore firmware version.</p>    
     <p><strong>Check codec enabled:</strong><br/>
     Check if the specified codec (H264, MPG2, ...) is enabled.</p>    
     <p><strong>Control video output:</strong><br/>
-    Turn the power of the video output on/off.</p>
-    <p><strong>Get out-of-memory statistics:</strong><br/>
-    Get a report of statistics on Out-of-Memory events.</p>     
+    Turn the power of the video output on/off.</p>    
     <p><strong>Get available memory:</strong><br/>
     Shows how much memory is split between the CPU (arm) and GPU.</p> 
 </script>
-
