@@ -8,40 +8,32 @@ npm install node-red-contrib-pi-vcgencmd
 ```
 
 ## Introduction
-The vcgencmd tool is used to send a broad range of commands to the VideoCore processor (indeed the 'vc' stands for VideoCore).
+The ***vcgencmd*** (linux command line) tool can be used to send a broad range of commands to the VideoCore processor (indeed the 'vc' stands for VideoCore).  VideoCore is a low-power mobile multimedia processor (manufactured by Broadcom), which can decode/encode a series of multimedia codecs:
 
-The documentation of the vcgencmd tool is not really sufficient to get started.  I got a lot of useful information from the book [Hacks für Raspberry Pi](https://books.google.be/books?isbn=3955616339).  For those who don't speak German, there is a 'translate' link in that page ...
+![image](https://user-images.githubusercontent.com/14224149/62661253-c854ff00-b970-11e9-9baa-deb53ce40dbd.png)
 
-Remark: The vcgencmd command is ***only available on Raspberry Pi hardware***, and perhaps on other devices containing a Broadcom VideoCore processor.
+The vcgencmd command is ***only available on Raspberry Pi hardware***, and perhaps on other devices containing a Broadcom VideoCore processor.
+
+Remark: The documentation of the vcgencmd tool is not really sufficient to get started.  I got a lot of useful information from the book [Hacks für Raspberry Pi](https://books.google.be/books?isbn=3955616339).  For those who don't speak German, there is a 'translate' link in that page ...
 
 ## Node configuration
 The vcgencmd command offers a large amount of options on a Raspberry Pi, but we agreed on the Node-RED [forum](https://discourse.nodered.org/t/ras-pi-supply-voltage/8791/12) to reduce the number of options in this node:
 
 ### Check throttling:
-Check whether the hardware has been throttle due to under-voltage levels, which will result in bad performance.
+Check whether the hardware has been throttled due to unsufficient current/voltage/power, which will result in bad performance.  Most of the throttling problems can be solved by using a better power supply.
 
-If the result is "0x0" then the power supply is supplying enough current/voltage/power to run the Raspberry pi.  All bits in the result value (e.g. "0x50005") have their own purpose: 
+Remark: the vcgencmd command returns a bitwise pattern, in which every bit flag has its own meaning.  Since this is rather hard to interpret for most users, this node will convert the bit flags to human readable fields in the output message(s): see the example output messages below ...
 
-+ 0: Under-voltage detected
-+ 1: Arm frequency capped 
-+ 2: Currently throttled 
-+ 3:	Soft temperature limit active
-+ 16: Under-voltage has occurred 
-+ 17: Arm frequency capped has occurred 
-+ 18: Throttling has occurred
-+ 19: Soft temperature limit has occurred
+There are two different modes in which your hardware will become slower:
++ ***Throttling*** will disable the turbo mode, which reduces the core voltage and sets ARM and GPU frequencies to non-turbo value.
++ ***Capping*** just limits the arm frequency (somewhere between 600MHz and 1200MHz) to try to avoid throttling.
 
-Under-voltage occurs when voltage drops below 4.63V, which means the Pi is throttled.
-The arm frequency capping occurs with temp > 80’C
-Over-temperature occurs with temp > 85’C. The Pi is throttled
+When the hardware is throttled but there is no under-voltage, then you can assume over-temperature. That assumption can be confirmed by using the *"Get temperature"* option. 
 
-Throttling removes turbo mode, which reduces core voltage, and sets arm and gpu frequencies to non-turbo value.
-Capping just limits the arm frequency (somewhere between 600MHz and 1200MHz) to try to avoid throttling.
-If you are throttled and not under-voltage then you can assume over-temperature. (confirm with vcgencmd measure_temp).
-
-Most of the throttling problems can be solved by using a better power supply.
-
-Although be aware running a stress test is not typical behaviour. If you never see a non-zero get_throttled value in normal usage, then you may not need to do anything.
+The hardware will switch automatically to another status, when the sensor measurements reach some criteria:
++ ***Under-voltage*** occurs when voltage drops below 4.63V.  In that case the Raspberry will be throttled.
++ The arm ***frequency capping*** occurs at temperatures above 80 degrees Celsius.
++ ***Over-temperature*** occurs at temperatures above 85 degrees Celsius. In that case the Raspberry will be throttled.
 
 Example output message, in case the checkbox *"Separate output messages per topic"* is unselected:
 ```
@@ -158,6 +150,8 @@ payload: "Sep 21 2018 15:43:17 ↵Copyright (c) 2012 Broadcom↵version 07f57128
 
 ### Check codec enabled:
 Check if the specified codec (H264, MPG2, ...) is enabled.
+
+Remark: For some codecs (like MPG2, WMV9, WVC1), you first need to pay a license fee before they can be used...
 
 Example output message:
 ```
