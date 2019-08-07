@@ -16,6 +16,14 @@
  module.exports = function(RED) {
     var settings = RED.settings;
     var child_process = require('child_process');
+    
+    // TODO sommige zaken instelbaar maken via input message.
+    // Out of memory statistics op readme verwijderen
+    // TODO testen of je display kan afzetten (of is dat hdmi ???)
+    // de node hernoemen zonder -pi-
+    // usage: send trigger message
+    // Zijn alle codecs in de lijst opgenomen ??
+    // de node status (pid) vermelden
 
     function VcGenCmdNode(config) {
         RED.nodes.createNode(this, config);
@@ -25,6 +33,7 @@
         this.voltage     = config.voltage;
         this.memory      = config.memory;
         this.videoOutput = config.videoOutput;
+        this.separateMsg = config.separateMsg;
         
         var node = this;
         
@@ -55,13 +64,15 @@
                     break;     
             }  
 
-            node.childProcess = exec(command, function (err, stdout, stderr) {
+            node.childProcess = child_process.exec(command, function (err, stdout, stderr) {
                 if (err) {
                     node.error("Error executing vcgencmd:" + err);
                 }
-                else {
-                    delete msg.payload;
-                    msg.payload = {};
+                else {                 
+                    // Remove newline ... characters from the result
+                    var result = stdout.trim();
+                    
+                    var messages = [];
                     
                     // Convert the command output to the correct format
                     switch (node.command) {
@@ -69,26 +80,27 @@
                             // Returns for example "Jan 13 2013 16:24:29
                             //                      Copyright (c) 2012 Broadcom
                             //                      version 362371 (release)"
-                            msg.payload = stdout;
-                            
+                            messages.push({payload: result, topic: node.command});
                             break;
                         case "display_power":
-                            // TODO Check if no return value?  Leave payload empty??
-                            msg.payload = stdout;
+                            // When we send e.g. value 'off' then the result will be "display_power=1".
+                            // Since we are not getting information from the firmware (i.e. we are controlling it), don't think an output message is required??
+                            //messages.push({payload: {}, topic: node.command});
                             break;
                         case "codec_enabled":
                             // Returns for example "H264=enabled".
                             // So we are only interested in the part after the equal-operator.
-                            msg.payload = stdout.split('=')[1];
+                            result = result.split('=')[1];
                             
                             // Let's convert it to a boolean
-                            if (msg.payload === "enabled") {
-                                msg.payload = true;
+                            if (result === "enabled") {
+                                result = true;
                             }
                             else {
-                                msg.payload = false;
+                                result = false;
                             }
                             
+                            messages.push({payload: result, topic: node.command});
                             break;
                         case "measure_clock":
                             // Returns for example "frequency(45)=700000000".
@@ -97,62 +109,105 @@
                             // The full enum can be found in the firmware source code:
                             // https://github.com/shacharr/videocoreiv-qpu-driver/blob/master/brcm_usrlib/dag/vmcsx/vcfw/drivers/chip/clock.h#L141
                             // So we are only interested in the part after the equal-operator.
-                            msg.payload = stdout.split('=')[1];
+                            result = result.split('=')[1];
+                            result = parseFloat(result);
                             
+                            messages.push({payload: result, topic: node.command});
                             break;
                         case "measure_volts":
                             // Returns for example "volt=1.20V".
                             // So we are only interested in the part after the equal-operator.
-                            msg.payload = stdout.split('=')[1];
+                            result = result.split('=')[1];
                             
                             // And since the unit is always Volt, we can remove the "V"
-                            msg.payload = msg.payload.slice(0, -1);
+                            result = result.substring(0, result.length - 1);
+                            result = parseFloat(result);
                             
+                            messages.push({payload: result, topic: node.command});
                             break;
                         case "measure_temp":
                             // Returns for example "temp=42.8'C".
                             // So we are only interested in the part after the equal-operator.
-                            msg.payload = stdout.split('=')[1];
+                            result = result.split('=')[1];
                             
                             // And since the unit is always Celsius, we can remove the "'C"
-                            msg.payload = msg.payload.slice(0, -2);
+                            result = result.substring(0, result.length - 2);
+                            result = parseFloat(result);
+                            
+                            messages.push({payload: result, topic: node.command});
                             break;
-
                         case "get_throttled":
                             // Thanks to Normen Hansen (see https://github.com/normen/rpi-throttled/blob/master/lib.js)
-                            var number = parseInt(String(stdout).replace("throttled=",""), 16);
+                            var number = parseInt(String(result).replace("throttled=",""), 16);
                             
-                            msg.payload.underVoltage            = (number >> 0)  & 1 ? true : false;
-                            msg.payload.frequencyCapped         = (number >> 1)  & 1 ? true : false;
-                            msg.payload.throttled               = (number >> 2)  & 1 ? true : false;
-                            msg.payload.softTempLimit           = (number >> 3)  & 1 ? true : false;
-                            msg.payload.underVoltageOccurred    = (number >> 16) & 1 ? true : false;
-                            msg.payload.frequencyCappedOccurred = (number >> 17) & 1 ? true : false;
-                            msg.payload.throttledOccurred       = (number >> 18) & 1 ? true : false;
-                            msg.payload.softTempLimitOccurred   = (number >> 19) & 1 ? true : false;
+                            // Convert the individual bits to separate boolean variables (to make them human readable)
+                            var underVoltage            = (number >> 0)  & 1 ? true : false;
+                            var frequencyCapped         = (number >> 1)  & 1 ? true : false;
+                            var throttled               = (number >> 2)  & 1 ? true : false;
+                            var softTempLimit           = (number >> 3)  & 1 ? true : false;
+                            var underVoltageOccurred    = (number >> 16) & 1 ? true : false;
+                            var frequencyCappedOccurred = (number >> 17) & 1 ? true : false;
+                            var throttledOccurred       = (number >> 18) & 1 ? true : false;
+                            var softTempLimitOccurred   = (number >> 19) & 1 ? true : false;
                             
-                            break;
-                        case "mem_oom":
-                            // TODO : check the output value
-                            msg.payload = stdout;
+                            if (node.separateMsg) {
+                                // Create a separate output message for every variable
+                                messages.push({payload: underVoltage           , topic: "under_voltage"});
+                                messages.push({payload: frequencyCapped        , topic: "frequency_capped"});
+                                messages.push({payload: throttled              , topic: "throttled"});
+                                messages.push({payload: softTempLimit          , topic: "soft_temp_limit"});
+                                messages.push({payload: underVoltageOccurred   , topic: "under_voltage_occurred"});
+                                messages.push({payload: frequencyCappedOccurred, topic: "frequency_capped_occurred"});
+                                messages.push({payload: throttledOccurred      , topic: "throttled_occurred"});
+                                messages.push({payload: softTempLimitOccurred  , topic: "soft_temp_limit_occurred"});
+                            }
+                            else {
+                                result = {};
+                                
+                                // Create a single output message, with payload containing all the variables
+                                result.underVoltage            = underVoltage;
+                                result.frequencyCapped         = frequencyCapped;
+                                result.throttled               = throttled;
+                                result.softTempLimit           = softTempLimit;
+                                result.underVoltageOccurred    = underVoltageOccurred;
+                                result.frequencyCappedOccurred = frequencyCappedOccurred;
+                                result.throttledOccurred       = throttledOccurred;
+                                result.softTempLimitOccurred   = softTempLimitOccurred;
+                                
+                                messages.push({payload: result, topic: node.command});
+                            }
                             
                             break;
                         case "get_mem":
                             // Returns for example "arm=448M".
                             // So we are only interested in the part after the equal-operator.
-                            msg.payload = stdout.split('=')[1];
+                            result = result.split('=')[1];
                             
                             // And since the unit is always MegaByte, we can remove the "M".
                             // TODO This could become Gb in the future ...
-                            msg.payload = msg.payload.slice(0, -1);
+                            result = result.substring(0, result.length - 1);
+                            result = parseInt(result);
                             
+                            messages.push({payload: result, topic: node.command});
                             break;
                     }
 
-                    node.send(msg);
+                    // Remove the payload from the original input message
+                    delete msg.payload;
+                    msg.payload = {};
+                    
+                    // Send the required output message(s)
+                    for (var i = 0; i < messages.length; i++) {
+                        var message = messages[i];
+                        var clonedMsg = RED.util.cloneMessage(msg);
+                        clonedMsg.payload = message.payload;
+                        clonedMsg.topic = message.topic;
+                        node.send(clonedMsg);
+                    }
                 }
                 
                 node.childProcess = null;
+                node.status({});
             });
             
             node.status({fill:"blue", shape:"dot", text:"pid:" + node.childProcess.pid});
