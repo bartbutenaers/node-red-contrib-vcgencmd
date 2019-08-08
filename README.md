@@ -10,7 +10,7 @@ npm install node-red-contrib-pi-vcgencmd
 ## Introduction
 The ***vcgencmd*** (linux command line) tool can be used to send a broad range of commands to the VideoCore processor (indeed the 'vc' stands for VideoCore).  VideoCore is a low-power mobile multimedia processor (manufactured by Broadcom), which can decode/encode a series of multimedia codecs:
 
-![PCB raspberry](https://user-images.githubusercontent.com/14224149/62661253-c854ff00-b970-11e9-9baa-deb53ce40dbd.png)
+![PCB raspberry](https://user-images.githubusercontent.com/14224149/62681161-548b1480-b9b9-11e9-96c0-547d2517f520.png)
 
 The vcgencmd command is ***only available on Raspberry Pi hardware***, and perhaps on other devices containing a Broadcom VideoCore processor.
 
