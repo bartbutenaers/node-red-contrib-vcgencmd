@@ -104,6 +104,8 @@ topic: "measure_temp"
 payload: 50.5
 ```
 
+Remark: when you only need to measure the temperature of your processor, you can also use my [node-red-contrib-cpu](https://github.com/bartbutenaers/node-red-contrib-cpu#single-output-message-with-core-temperatures) node.  That cpu-node has the advantage that it works on multiple platforms, so not only Raspberry Pi!
+
 ### Get voltage level:
 Get the voltage level (V) of the specified hardware component (core, sdram_c, ...).
 
