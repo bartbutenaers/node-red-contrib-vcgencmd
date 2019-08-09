@@ -12,7 +12,11 @@ The ***vcgencmd*** (linux command line) tool can be used to send a broad range o
 
 ![PCB raspberry](https://user-images.githubusercontent.com/14224149/62681161-548b1480-b9b9-11e9-96c0-547d2517f520.png)
 
-The vcgencmd command is ***only available on Raspberry Pi hardware***, and perhaps on other devices containing a Broadcom VideoCore processor.
+The vcgencmd command is ***only available on Raspberry Pi hardware***, and perhaps on other devices containing a Broadcom VideoCore processor.  When the vcgencmd command cannot be executed, the node will inform you about this in multiple ways:
++ Via a warning in the log: *"The vcgencmd command is not supported by this hardware platform"*.
++ Via the node status:
+
+   ![image](https://user-images.githubusercontent.com/14224149/62809211-9bccee80-bafa-11e9-81e3-cbb388a2f532.png)
 
 Remark: The documentation of the vcgencmd tool is not really sufficient to get started.  I got a lot of useful information from the book [Hacks für Raspberry Pi](https://books.google.be/books?isbn=3955616339).  For those who don't speak German, there is a 'translate' link in that page ...
 
