@@ -93,9 +93,19 @@
                             messages.push({payload: result, topic: node.command});
                             break;
                         case "display_power":
-                            // When we send e.g. value 'off' then the result will be "display_power=1".
-                            // Since we are not getting information from the firmware (i.e. we are controlling it), don't think an output message is required??
-                            //messages.push({payload: {}, topic: node.command});
+                            // When we send e.g. value 'on' then the result will be "display_power=1" (which confirms that the power has been switched on).
+                            // So we are only interested in the part after the equal-operator.
+                            result = result.split('=')[1];
+                            
+                            // Convert '0' to 'off' and '1' to 'on'
+                            if (result === "1") {
+                                result = "on";
+                            }
+                            else {
+                                result = "off";
+                            }
+                            
+                            messages.push({payload: result, topic: node.command});
                             break;
                         case "codec_enabled":
                             // Returns for example "H264=enabled".
