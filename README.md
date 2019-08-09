@@ -151,12 +151,16 @@ payload: 250000000
 ```
 
 ### Get firmware version:
-Shows the VideoCore firmware version.
+Shows the VideoCore firmware version.  The output will be splitted automatically into an array of 3 strings.
 
 Example output message:
 ```
 topic: "version"
-payload: "Sep 21 2018 15:43:17 ↵Copyright (c) 2012 Broadcom↵version 07f57128b8491ffdefcdfd13f7b4961b3006d9a9 (clean) (release)"
+payload: [
+   "Sep 21 2018 15:43:17 ",
+   "Copyright (c) 2012 Broadcom",
+   "version 07f57128b8491ffdefcdfd13f7b4961b3006d9a9 (clean) (release)"
+]
 ```
 
 ### Check codec enabled:
