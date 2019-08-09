@@ -11,7 +11,17 @@
   limitations under the License.
 -->
 <script type="text/javascript">
-    // TODO icoontjes van fontawesome ophalen 
+    var commands = [
+        {v:"get_throttled" , t:"Check throttling"},
+        {v:"measure_temp"  , t:"Get temperature"},
+        {v:"measure_volts" , t:"Get voltage level"},
+        {v:"measure_clock" , t:"Get clock frequency"},
+        {v:"version"       , t:"Get firmware version"},
+        {v:"codec_enabled" , t:"Check codec enabled"},
+        {v:"display_power" , t:"Control video output"},
+        {v:"get_mem"       , t:"Get available memory"}
+    ];
+    
     RED.nodes.registerType('vcgencmd',{
         category: 'function',
         color: '#E9967A',
@@ -29,10 +39,29 @@
         outputs:1,
         icon: "rpi.png",
         label: function() {
-            return this.name || "vcgencmd";
+            var optionText = "";
+
+            // Get the command option text, based on the command option value
+            for (var i = 0; i < commands.length; i++) {
+               if (commands[i].v === this.command) {
+                   optionText = commands[i].t;
+                   break;
+               }
+            }
+            return this.name || optionText || "vcgencmd";
         },
         paletteLabel: "vcgencmd",
         oneditprepare: function() {
+            // Fill the dropdown with all available commands
+            for (var i = 0; i < commands.length; i++) {
+                var value = commands[i].v;
+                var text = commands[i].t;
+                $('#node-input-command').append($("<option></option>").attr("value", value).text(text));
+            }
+            
+            // Make sure the selected command option value is also selected in the <select> tag
+            $('#node-input-command').val(this.command);
+            
             $("#node-input-command").change(function() {
                 var command = $("#node-input-command").val();
                 
@@ -72,14 +101,6 @@
     <div class="form-row">
         <label for="node-input-command"><i class="fa fa-terminal"></i> Command</label>
         <select type="text" id="node-input-command" style="width:70%;">
-            <option value="get_throttled">Check throttling</option>
-            <option value="measure_temp">Get temperature</option>  
-            <option value="measure_volts">Get voltage level</option>
-            <option value="measure_clock">Get clock frequency</option>
-            <option value="version">Get firmware version</option>
-            <option value="codec_enabled">Check codec enabled</option>
-            <option value="display_power">Control video output</option>  
-            <option value="get_mem">Get available memory</option>
         </select>
     </div>
     <div class="form-row command-row" id="separateMsg-div">
@@ -177,3 +198,4 @@
     <p><strong>Get available memory:</strong><br/>
     Shows how much memory is split between the CPU (arm) and GPU.</p> 
 </script>
+
