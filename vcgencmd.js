@@ -16,14 +16,6 @@
  module.exports = function(RED) {
     var settings = RED.settings;
     var child_process = require('child_process');
-    
-    // TODO sommige zaken instelbaar maken via input message.
-    // Out of memory statistics op readme verwijderen
-    // TODO testen of je display kan afzetten (of is dat hdmi ???)
-    // de node hernoemen zonder -pi-
-    // usage: send trigger message
-    // Zijn alle codecs in de lijst opgenomen ??
-    // de node status (pid) vermelden
 
     function VcGenCmdNode(config) {
         RED.nodes.createNode(this, config);
@@ -80,6 +72,9 @@
                             // Returns for example "Jan 13 2013 16:24:29
                             //                      Copyright (c) 2012 Broadcom
                             //                      version 362371 (release)"
+                            // The 3 lines are separated by newlines, so we will split it into an array with length 3.
+                            // The splitting will be done on \n (\r and \r\n are not required since vcgencmd is only available on Linux).
+                            result = result.split(/\n/);
                             messages.push({payload: result, topic: node.command});
                             break;
                         case "display_power":
