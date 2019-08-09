@@ -26,10 +26,25 @@
         this.memory      = config.memory;
         this.videoOutput = config.videoOutput;
         this.separateMsg = config.separateMsg;
+        this.supported   = true;
         
         var node = this;
         
+        child_process.exec("vcgencmd version", function (err, stdout, stderr) {
+            debugger;
+            if (stderr) {
+                node.supported = false;
+                node.warn("The vcgencmd command is not supported by this hardware platform");
+                node.status({fill:"grey", shape:"dot", text:"not supported"});
+            }
+        });
+
         node.on("input", function(msg) {
+            if (!node.supported) {
+                // Ignore the input message when the vcgencmd command is not supported by this hardware platform
+                return;
+            }
+            
             if (node.childProcess) {
                 node.warn("Previous vcgencmd command hasn't finished yet");
                 return;
