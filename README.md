@@ -26,7 +26,7 @@ Some remarks:
 + When a new input message is send during the processing of the previous message, then the new input message will be ignored.  A warning will be logged to inform about this...
 
 ## Node configuration
-The vcgencmd command offers a large amount of options on a Raspberry Pi, but we agreed on the Node-RED [forum](https://discourse.nodered.org/t/ras-pi-supply-voltage/8791/12) to reduce the number of options in this node:
+The vcgencmd command offers a large amount of options on a Raspberry Pi, but we agreed on the Node-RED [forum](https://discourse.nodered.org/t/ras-pi-supply-voltage/8791/12) to reduce the number of options in this node.  The other (less useful) options can be called easily from Node-RED via an Exec node.  The following options are currently implemented in this node:
 
 ### Check throttling:
 Check whether the hardware has been throttled due to unsufficient current/voltage/power, which will result in bad performance.  Most of the throttling problems can be solved by using a better power supply.
