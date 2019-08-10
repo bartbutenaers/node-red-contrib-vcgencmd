@@ -31,7 +31,6 @@
         var node = this;
         
         child_process.exec("vcgencmd version", function (err, stdout, stderr) {
-            debugger;
             if (stderr) {
                 node.supported = false;
                 node.warn("The vcgencmd command is not supported by this hardware platform");
@@ -67,7 +66,25 @@
                     command = command + " " + node.memory;
                     break;     
                 case "display_power":
-                    command = command + " " + node.videoOutput;
+                    var videoOutput = node.videoOutput;
+                
+                    if (videoOutput === "") {
+                        // When no videoOutput option has been specified in the config screen, then get it from the msg.payload
+                        videoOutput = msg.payload;
+                        
+                        if (videoOutput === "ON" || videoOutput === "on") {
+                            videoOutput = "1";
+                        }
+                        else if (videoOutput === "OFF" || videoOutput === "off") {
+                            videoOutput = "0";
+                        }
+                        else {
+                            node.warn("The msg.payload should contain one of the following values: on/ON/off/OFF");
+                            return;
+                        }
+                    }                
+                
+                    command = command + " " + videoOutput;
                     break;     
             }  
 
