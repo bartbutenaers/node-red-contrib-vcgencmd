@@ -48,6 +48,31 @@
                    break;
                }
             }
+            
+            // Depending on the router type, extra options should be showed
+            switch (this.command) {
+                case "codec_enabled":
+                    optionText = optionText + " (" + this.codec + ")";
+                    break;
+                case "measure_clock":
+                    optionText = optionText + " (" + this.clock + ")";
+                    break;
+                case "measure_volts":
+                    optionText = optionText + " (" + this.voltage + ")";
+                    break;     
+                case "get_mem":
+                    optionText = optionText + " (" + this.memory + ")";
+                    break;     
+                case "display_power":
+                    if (this.videoOutput === "1") {
+                        optionText = optionText + " (On)";
+                    }
+                    else {
+                        optionText = optionText + " (Off)";
+                    }
+                    break;     
+            }   
+            
             return this.name || optionText || "vcgencmd";
         },
         paletteLabel: "vcgencmd",
