@@ -41,7 +41,7 @@
         label: function() {
             var optionText = "";
 
-            // Get the command option text, based on the command option value
+            // Get the command option text, to show it in the label (when no node name has been specified)
             for (var i = 0; i < commands.length; i++) {
                if (commands[i].v === this.command) {
                    optionText = commands[i].t;
@@ -49,7 +49,7 @@
                }
             }
             
-            // Depending on the router type, extra options should be showed
+            // Depending on the router type, extra options should be showed in the label
             switch (this.command) {
                 case "codec_enabled":
                     optionText = optionText + " (" + this.codec + ")";
@@ -64,11 +64,16 @@
                     optionText = optionText + " (" + this.memory + ")";
                     break;     
                 case "display_power":
-                    if (this.videoOutput === "1") {
-                        optionText = optionText + " (On)";
-                    }
-                    else {
-                        optionText = optionText + " (Off)";
+                    switch (this.videoOutput) {
+                        case "0":
+                            optionText = optionText + " (Off)";
+                            break;
+                        case "1":
+                            optionText = optionText + " (On)";
+                            break;
+                        case "":
+                            // Empty dropdown, so don't show anything extra
+                            break;
                     }
                     break;     
             }   
@@ -191,6 +196,7 @@
     <div class="form-row command-row" id="videoOutput-div">
         <label for="node-input-videoOutput"><i class="fa fa-power-off"></i> Video output</label>
         <select type="text" id="node-input-videoOutput" style="width:70%;">
+            <option value=""></option>
             <option value="1">On</option>
             <option value="0">Off</option>
         </select>
