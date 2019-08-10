@@ -72,10 +72,10 @@
                         // When no videoOutput option has been specified in the config screen, then get it from the msg.payload
                         videoOutput = msg.payload;
                         
-                        if (videoOutput === "ON" || videoOutput === "on") {
+                        if (videoOutput === "ON" || videoOutput === "on" || videoOutput === "1" || videoOutput === 1 || videoOutput === true) {
                             videoOutput = "1";
                         }
-                        else if (videoOutput === "OFF" || videoOutput === "off") {
+                        else if (videoOutput === "OFF" || videoOutput === "off" || videoOutput === "0" || videoOutput === 0 || videoOutput === false) {
                             videoOutput = "0";
                         }
                         else {
