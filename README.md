@@ -179,9 +179,29 @@ payload: true
 ```
 
 ### Control video output:
-Turn the power of the video output on/off.
+Turn the power of the HDMI video output on/off, and the new output status (on/off) will be returned in the output message.  The latter one could be used to verify whether the power switch was succesfull.
 
-Since we are not fetching information from the hardware (i.e. we are controlling it), no output message will be send.
+There are two ways to switch the video output:
+1. Use two separate nodes, one for activating the output and another one for deactivating the output:
+
+   ![image](https://user-images.githubusercontent.com/14224149/62818532-bcbc3080-bb48-11e9-9f95-fca335f6a9be.png)
+   
+   ```
+   [{"id":"c9af1deb.e3e6c","type":"inject","z":"412200cc.017c6","name":"Activate video output","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":190,"y":440,"wires":[["57f9d829.9e1b38"]]},{"id":"d4654542.f2ab68","type":"debug","z":"412200cc.017c6","name":"Check if power is 'On'","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","x":700,"y":440,"wires":[]},{"id":"57f9d829.9e1b38","type":"vcgencmd","z":"412200cc.017c6","name":"","command":"display_power","codec":"H264","clock":"core","voltage":"core","memory":"arm","videoOutput":"1","separateMsg":false,"x":450,"y":440,"wires":[["d4654542.f2ab68"]]},{"id":"e6315fcc.61863","type":"inject","z":"412200cc.017c6","name":"Dectivate video output","topic":"","payload":"","payloadType":"date","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":200,"y":480,"wires":[["2e9a2f14.76d8e"]]},{"id":"41799ae7.6bf3a4","type":"debug","z":"412200cc.017c6","name":"Check if power is 'Off'","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","x":700,"y":480,"wires":[]},{"id":"2e9a2f14.76d8e","type":"vcgencmd","z":"412200cc.017c6","name":"","command":"display_power","codec":"H264","clock":"core","voltage":"core","memory":"arm","videoOutput":"0","separateMsg":false,"x":450,"y":480,"wires":[["41799ae7.6bf3a4"]]}]
+   ```
+   
+2. Via a single node, that (de)activates the video output.  This can be achieved by leaving the dropdown empty, and sending an input message with ```msg.payload``` containing one of the following values: *on / ON / off / OFF*.
+
+   ![image](https://user-images.githubusercontent.com/14224149/62818638-25f07380-bb4a-11e9-9a7c-40d3a4aa69fa.png)
+   ```
+   [{"id":"8dcc78a1.78a428","type":"inject","z":"412200cc.017c6","name":"Activate video output","topic":"","payload":"on","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":190,"y":560,"wires":[["76472fe1.60b83"]]},{"id":"35a94a76.b11f06","type":"debug","z":"412200cc.017c6","name":"Check power switch","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","x":700,"y":560,"wires":[]},{"id":"76472fe1.60b83","type":"vcgencmd","z":"412200cc.017c6","name":"","command":"display_power","codec":"H264","clock":"core","voltage":"core","memory":"arm","videoOutput":"","separateMsg":false,"x":440,"y":560,"wires":[["35a94a76.b11f06"]]},{"id":"bec6a5fa.92fc58","type":"inject","z":"412200cc.017c6","name":"Dectivate video output","topic":"","payload":"off","payloadType":"str","repeat":"","crontab":"","once":false,"onceDelay":0.1,"x":200,"y":600,"wires":[["76472fe1.60b83"]]}]
+   ```
+
+Example output message (when the video output has been set to *'on'*):
+```
+topic: "display_power"
+payload: "on"
+```
 
 ### Get available memory:
 Shows how much memory is split between the CPU (arm) and GPU, both values expressed in Megabytes.
