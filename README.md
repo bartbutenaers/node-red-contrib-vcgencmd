@@ -211,3 +211,12 @@ Example output message:
 topic: "get_mem"
 payload: 64
 ```
+
+## Usage via Docker
+Thanks to [MikeS7](https://github.com/mikeS7) who pointed out that this node can be used via Node-RED running in a Docker container (on a Raspberry Pi platform), by using following guidelines:
+1. This node will internally use the full path for the command (i.e. /opt/vc/bin/vcgencmd).
+2. The Node-RED Docker container should be started with some extra arguments:
+   ```
+   docker run ... --device=/dev/vchiq -e LD_LIBRARY_PATH=/opt/vc/lib -v /opt/vc:/opt/vc:ro ...
+   ```
+   Summarized: the /opt/vc/ directory of the host Raspberry operating system will be mounted into the Docker container, to make the files available in the container.  Moreover the *VCHIQ* (VideoCore Host Interface Queue) message queue system is made available, to communicate with the GPU.
