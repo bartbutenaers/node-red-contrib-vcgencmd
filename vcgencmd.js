@@ -27,13 +27,17 @@
         this.videoOutput = config.videoOutput;
         this.separateMsg = config.separateMsg;
         this.supported   = true;
+        // To support Docker on Raspberry Pi, we will use the full path (for Raspberry).
+        // See https://github.com/bartbutenaers/node-red-contrib-vcgencmd/issues/1
+        this.fullPath    = "/opt/vc/bin/vcgencmd";
         
         var node = this;
         
-        child_process.exec("vcgencmd version", function (err, stdout, stderr) {
+        // Check whether the vcgencmd command is supported on the current system.
+        child_process.exec(node.fullPath + " version", function (err, stdout, stderr) {
             if (stderr) {
                 node.supported = false;
-                node.warn("The vcgencmd command is not supported by this hardware platform");
+                node.warn("The " + node.fullPath + " command is not supported by this hardware platform");
                 node.status({fill:"grey", shape:"dot", text:"not supported"});
             }
         });
@@ -49,7 +53,7 @@
                 return;
             }
             
-            var command = "vcgencmd " + node.command;
+            var command = node.fullPath + " " + node.command;
             
             // For some commands an extra command line parameter will be specified in the configuration
             switch (node.command) {
@@ -90,7 +94,7 @@
 
             node.childProcess = child_process.exec(command, function (err, stdout, stderr) {
                 if (err) {
-                    node.error("Error executing vcgencmd:" + err);
+                    node.error("Error executing " + node.fullPath + " : " + err);
                 }
                 else {                 
                     // Remove newline ... characters from the result
