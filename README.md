@@ -1,4 +1,4 @@
-# node-red-contrib-pi-vcgencmd
+# node-red-contrib-vcgencmd
 A Node-RED node to support vcgencmd actions on Raspberry Pi.
 
 ## Install
