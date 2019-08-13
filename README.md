@@ -4,7 +4,7 @@ A Node-RED node to support vcgencmd actions on Raspberry Pi.
 ## Install
 Run the following npm command in your Node-RED user directory (typically ~/.node-red):
 ```
-npm install node-red-contrib-pi-vcgencmd
+npm install node-red-contrib-vcgencmd
 ```
 
 ## Introduction
