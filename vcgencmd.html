@@ -27,6 +27,7 @@
         color: '#E9967A',
         defaults: {
             name: {value:""},
+            fullPath: {value:"/opt/vc/bin/vcgencmd"},
             command: {value:"get_throttled"},
             codec: {value:"H264"},
             clock: {value:"core"},
@@ -82,6 +83,9 @@
         },
         paletteLabel: "vcgencmd",
         oneditprepare: function() {
+            // Migrate old nodes that don't have a fullPath variable yet
+            $('#node-input-fullPath').val(this.fullPath || "/opt/vc/bin/vcgencmd");
+        
             // Fill the dropdown with all available commands
             for (var i = 0; i < commands.length; i++) {
                 var value = commands[i].v;
@@ -128,6 +132,10 @@
 </script>
 
 <script type="text/x-red" data-template-name="vcgencmd">
+    <div class="form-row">
+         <label for="node-input-fullPath"><i class="fa fa-terminal"></i> Full path</label>
+         <input type="text" id="node-input-fullPath" placeholder="/opt/vc/bin/vcgencmd">
+     </div>
     <div class="form-row">
         <label for="node-input-command"><i class="fa fa-terminal"></i> Command</label>
         <select type="text" id="node-input-command" style="width:70%;">
