@@ -16,6 +16,7 @@
  module.exports = function(RED) {
     var settings = RED.settings;
     var child_process = require('child_process');
+    var fs = require('fs');
 
     function VcGenCmdNode(config) {
         RED.nodes.createNode(this, config);
@@ -27,24 +28,34 @@
         this.videoOutput = config.videoOutput;
         this.separateMsg = config.separateMsg;
         this.supported   = true;
+        this.exists      = true;
         // To support Docker on Raspberry Pi, we will use the full path (for Raspberry).
         // See https://github.com/bartbutenaers/node-red-contrib-vcgencmd/issues/1
-        this.fullPath    = "/opt/vc/bin/vcgencmd";
+        this.fullPath    = config.fullPath || "/opt/vc/bin/vcgencmd";
         
         var node = this;
         
-        // Check whether the vcgencmd command is supported on the current system.
-        child_process.exec(node.fullPath + " version", function (err, stdout, stderr) {
-            if (stderr) {
-                node.supported = false;
-                node.warn("The " + node.fullPath + " command is not supported by this hardware platform");
-                node.status({fill:"grey", shape:"dot", text:"not supported"});
-            }
-        });
+        
+        if (!fs.existsSync(node.fullPath)) {
+            this.exists = false;
+            node.warn("The specified " + node.fullPath + " path does not exist");
+            node.status({fill:"red", shape:"dot", text:"invalid path"});
+        }
+        else {
+            // Check whether the vcgencmd command is supported on the current system.
+            child_process.exec(node.fullPath + " version", function (err, stdout, stderr) {
+                if (stderr) {
+                    node.supported = false;
+                    node.warn("The " + node.fullPath + " command is not supported by this hardware platform");
+                    node.status({fill:"grey", shape:"dot", text:"not supported"});
+                }
+            });
+        }
 
         node.on("input", function(msg) {
-            if (!node.supported) {
-                // Ignore the input message when the vcgencmd command is not supported by this hardware platform
+            if (!node.exists || !node.supported) {
+                // Ignore the input message when the path to the vcgencmd binary is invalid,
+                // or when the vcgencmd command is not supported by this hardware platform
                 return;
             }
             
